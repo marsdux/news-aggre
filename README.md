@@ -1,51 +1,68 @@
-# 📰 NewsAggre
+# NewsAggre
 
-NewsAggre is a **robust Java desktop application** designed to aggregate, parse, group, and analyze news articles from live RSS feeds. Built with a rich graphical user interface (Swing), it features advanced story-grouping algorithms, metadata tagging, industry classification, and custom reporting tools.
+A Java Swing desktop app that reads **CNBC's free public RSS feeds** and turns each headline into a structured outline: key takeaways, verbatim quotes, a PESTEL read, sector tags, connected-story grouping and a time-decaying importance score.
 
-## 🚀 Key Architectural Features
+Everything is **rule-based**. There is no LLM, no API key and no external library. The app compiles and runs with only the JDK.
 
-* **Live RSS Engine (`RssFetcher`)**: Asynchronously fetches and parses live XML/JSON article feeds with built-in network safety and progress monitoring.
-* **Intelligent Data Pipeline**:
-  * **Story Grouper (`StoryGrouper`)**: Automatically identifies related articles and groups them into unified news stories.
-  * **Summarizer (`Summarizer` & `QuoteExtractor`)**: Extracts core highlights, metrics, and relevant direct quotes from article bodies.
-  * **Industry Tagger (`IndustryTagger`)**: Scans article context to classify feeds into financial, technology, or custom market sectors.
-* **System Lifecycle Monitoring (`LifecycleAnalyzer`)**: Tracks application states, feed health metrics, and background task performances visualized using a custom interface (`LifecycleGauge`).
-* **Advanced Document Exporting (`OfficeExporter`)**: Generates and exports structured news summaries and aggregated briefs straight into Microsoft Office formats.
-* **Interactive UI Layers (`MainFrame`)**: Implements an optimized, multi-threaded workspace complete with structural outlines (`OutlineBuilder`), custom rendering tables, and clean metadata tag chips.
+<!--
+Add screenshots after you upload them to a docs/ folder, then remove these comment markers:
+![Main window](docs/main-window.png)
+![Outline view](docs/outline.png)
+-->
 
-## 🛠️ Built With
+## Features
 
-* **Java SE** (JDK 8 or higher) [1]
-* **NetBeans IDE** - Built-in project configuration paths [1]
-* **Java Swing & AWT** - For the interactive dashboard interface [1]
+- **Free content only:** fetches CNBC's public RSS feeds (never CNBC Pro or paywalled stories) and, where possible, the full article text and lead image. If a full-page fetch is blocked, it falls back to the RSS title and description.
+- **Key-takeaway outlines:** an extractive, word-frequency summarizer picks the most informative sentences and drops redundant ones.
+- **Categorized outline:** Key Event, Market Analysis and Impact, Figures and Data, Outlook, and a **PESTEL** read (political, economic, social, technological, environmental, legal) based on what the article actually contains.
+- **Verbatim quotes:** quoted text is extracted exactly, not paraphrased.
+- **Connected stories:** articles about the same event are grouped using keyword overlap, so follow-ups are merged.
+- **Sector tagging:** up to three industry or market-sector tags per article.
+- **Life-cycle score:** an importance score that decays over time unless the story's cluster keeps growing, in which case it is marked **Developing**.
+- **Save and retrieve:** generated outlines are stored locally and can be reopened by article title.
+- **Export and print:** export to **Excel (`.xlsx`)** and **Word (`.docx`)**, written directly without Apache POI, and print from the app.
+- **Safer by design:** URL validation, size-bounded network reads, a restricted deserialization filter and atomic file writes.
 
-## 💻 Setup & Local Execution
+> The score, tags and outlines come from keyword rules. Treat them as a scanning aid, not as financial advice or a verified measure of market impact.
 
-1. **Clone this project repository** to your local Windows system:
+## Getting started
+
+**Requirements:** JDK 17 or newer. NetBeans is optional.
+
+1. Clone the repository:
+
    ```bash
-   git clone https://github.com
+   git clone https://github.com/marsdux/news-aggre.git
    ```
 
-2. **Open the project in NetBeans**:
-   * Launch **NetBeans IDE**.
-   * Navigate to `File > Open Project`.
-   * Select the root `newsaggre` directory and click **Open**.
+2. In NetBeans, choose *File > Open Project* and select the `newsaggre` folder.
+3. Press `F6` to build and run, or use Ant:
 
-3. **Compile and Run**:
-   * Press **`F6`** or click the green **Play** icon in NetBeans to clean, compile, and execute the desktop workspace.
+   ```bash
+   cd newsaggre
+   ant jar
+   java -jar dist/newsaggre.jar
+   ```
 
-## 📂 Project Structure Snapshot
+The main class is `newsaggre.App`. Saved articles and outlines are stored locally on your machine.
+
+## Project structure
+
 ```text
-newsaggre/
-├── src/newsaggre/
-│   ├── App.java                   # Main entry point [1]
-│   ├── MainFrame.java             # Graphical UI Dashboard [1]
-│   ├── RssFetcher.java            # Network content streaming [1]
-│   ├── StoryGrouper.java          # Article grouping logic [1]
-│   ├── LifecycleAnalyzer.java     # App performance and metrics monitoring [1]
-│   └── OfficeExporter.java        # MS Office document exporting pipeline [1]
-└── build.xml                      # NetBeans compilation definitions [1]
+newsaggre/src/newsaggre/
+├── App.java, MainFrame.java        entry point and main window
+├── FeedCatalog.java, RssFetcher.java   feed list and fetching
+├── Summarizer.java, QuoteExtractor.java, OutlineBuilder.java   outline generation
+├── StoryGrouper.java, IndustryTagger.java, LifecycleAnalyzer.java   grouping, tags, score
+├── OutlineService.java, OutlineDatabase.java, ArticleStore.java   saving and retrieval
+├── OfficeExporter.java, PrintUtil.java   export and printing
+└── UrlSafety.java, BoundedReader.java, SerializationSafety.java   safety helpers
 ```
 
-## 👥 Authors
-* **marsdux** - Core Software Architecture & Development [1]
+## Notes
+
+This project is not affiliated with CNBC. Use it in line with CNBC's terms of use.
+
+## Author
+
+Built by [@marsdux](https://github.com/marsdux).
